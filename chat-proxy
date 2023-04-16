@@ -1,0 +1,47 @@
+#!/bin/sh
+# 
+# A userscript for Emacs interface to Web-based chat (e.g., ChatGPT).
+# Copyright (c) 2023, Hiroyuki Ohsaki.
+# All rights reserved.
+# 
+
+# Parse command line options.
+while getopts 's:r:' var
+do
+    case "$var" in
+	s)
+	    mode=send
+	    file=$OPTARG
+	    ;;
+	r)
+	    mode=recv
+	    file=$OPTARG
+	    ;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+# FIXME: Avoid hard-coding.
+tmpfile=/tmp/chat-proxy.tmp
+
+case "$mode" in
+    send)
+	# Save all the text content.
+	cp $QUTE_TEXT $tmpfile
+	# Fill the form with the query text stored in $FILE.
+	echo "insert-text `cat $file`" >>$QUTE_FIFO
+	sleep .1
+	# Press the entry key in qutebrowser.
+	echo 'fake-key <Enter>' >>$QUTE_FIFO
+	;;
+    recv)
+	# Detect the newly-generated texts.
+	# 1. Remove the first three lines.
+	# 2. Pick lines starting with '+'.
+	# e. Remove '+' at the beginning of line.
+	diff -u $tmpfile $QUTE_TEXT | \
+	    sed -n '4,$p' | sed -n '/^+/p' | sed 's/^+//' >$file
+	;;
+esac
+
+exit 0
