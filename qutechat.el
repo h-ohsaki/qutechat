@@ -14,12 +14,18 @@
 
 ;; Usage:
 ;; 1. Start a qutebrowser.
-;; 2. Visit a Web-based chat page (e.g., https://chat.openai.com/).
-;; 3. Focus the input form field.
-;; 4. Select a region and execute M-x qutechat-send-region.
-;; 5. After the response is shown, execute M-x qutechat-display-reply.
+;; 2. Visit a Web-based chat such as ChatGPT (https://chat.openai.com/)
+;;    in qutebrowser.
+;; 3. Focus the input form field (e.g., `Send a messge...' field in
+;;    ChatGPT).
+;; 4. On Emacs, select the region in the current buffer as a query
+;;    string, and execute `M-x qutechat-send-region`.
+;; 5. The query string is submitted in qutebrower.  The response from the
+;;    Web-based chat system should soon be displayed.
+;; 6. After the response is fully displayed in qutebrower, execute M-x
+;;    qutechat-display-reply from Emacs.
 
-(defvar qutechat-proxy-prog "~/.config/qutebrowser/chat-proxy"
+(defvar qutechat-proxy-prog "~/src/qutechat/chat-proxy"
   "The name of the qutebrowser userscript.")
 
 ;; FIXME: Avoid hard-coding.
