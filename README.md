@@ -52,3 +52,27 @@ the userscript `chat-proxy`.
 
 6. After the response is fully displayed in qutebrower, execute M-x
    qutechat-display-reply from Emacs.
+
+# PATCH TO QUTEBROWSER
+
+On X Window System, qutebrowser raises the window when a command is
+executed.  Due to this behavior, running **qutechat** may cause the
+window focus to move from Emacs to qutebrowser.  To prevent this
+annoying inconvenience, you can apply the following patch to
+qutebrowser.
+
+``` python
+--- mainwindow/mainwindow.py.orig       2023-04-17 03:42:04.348059533 +0900
++++ mainwindow/mainwindow.py    2023-04-17 03:45:50.230284419 +0900
+@@ -80,7 +80,9 @@
+         window.show()
+         should_raise = True
+ 
+-    if should_raise and not no_raise:
++    # Apr 17, 2023 by Hiroyuki Ohsaki        
++    # Completely disable raising window.
++    if False and should_raise and not no_raise:
+         raise_window(window)
+ 
+     return window.win_id
+```
