@@ -23,7 +23,7 @@
 ;; (autoload 'qutechat-send-region "qutechat" nil t)
 ;; (autoload 'qutechat-display-reply "qutechat" nil t)
 ;; (global-set-key "\C-cq" 'qutechat-send-region)
-;; (global-set-key "\C-cQ" 'qutechat-display-reply)
+;; (global-set-key "\C-cQ" 'qutechat-insert-reply)
 
 ;; Usage:
 ;; 1. Start a qutebrowser.
@@ -44,8 +44,8 @@
 ;; FIXME: Avoid hard-coding.
 (defvar qutechat-tmpfile "/tmp/qutechat.tmp")
 
-;; (qutechat-send-string "Emacs と vi はどちらがいいですか。")
-;; (qutechat-send-string "Emacs の面白い歴史は?")
+;; (qutechat-send-string "which of Emacs or vi is better?")
+;; (qutechat-send-string "what is Emacs's interesting history?")
 (defun qutechat-send-string (str)
   "Send a query string STR to a Web-based chat via qutebrowser."
   (interactive)
@@ -82,19 +82,10 @@ and return it as a string."
     (insert-file-contents qutechat-tmpfile)
     (buffer-string)))
 
-;; (qutechat-display-reply)
-(defun qutechat-display-reply ()
-  "Display the response for the last query from a Web-based
-chat."
+;; (qutechat-insert-reply)
+(defun qutechat-insert-reply ()
+  "Insert the response for the last query from a Web-based
+chat at the point."
   (interactive)
-  ;; Display the response in the other window.
-  (let ((buf (get-buffer-create "*Qutechat Output*"))
-	(reply (qutechat-parse-reply)))
-    (with-current-buffer buf
-      (erase-buffer)
-      (insert reply)
-      ;; Enable automatic text wrapping.
-      (visual-line-mode 1)
-      (delete-other-windows)
-      (split-window)
-      (set-window-buffer (next-window) buf))))
+  (let ((reply (qutechat-parse-reply)))
+    (insert reply)))
