@@ -84,6 +84,8 @@ and return it as a string."
   (run-hooks 'qutechat-shell-command-hook)
   (sit-for .1)
   (with-temp-buffer
+    ;; FIXME: This code assumes the first line is the query.
+    (insert "Q. ")
     (insert-file-contents qutechat-tmpfile)
     (buffer-string)))
 
