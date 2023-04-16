@@ -4,6 +4,15 @@ qutechat - Emacs interface to Web-based chat (e.g., ChatGPT)
 
 # DESCRIPTOR
 
+以下をオープンソースソフトウェアのマニュアルにふさわしい英語に直して。
+qutechat は、ChatGPT のような Web ベースのチャットシステムを、Emacs か
+ら対話的に操作するための Emacs Lisp プログラムです。qutechat は、
+qutebrowser の userscript 機能を利用して実現されています。このため、
+qutechat の動作には qutebrowser が必要です。qutechat は、qutebrowser
+をリモートから操作し、qutebrowser 上で chat-proxy という名前の
+userscript を実行します。したがって、chat-proxy という userscript を
+qutebrowser から実行できることが必要です。
+
 # INSTALLATION
 
 1. Copy `qutechat.el` to an Emacs-lisp directory such as
