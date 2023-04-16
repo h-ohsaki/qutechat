@@ -6,6 +6,8 @@ qutechat - Emacs interface to Web-based chat (e.g., ChatGPT)
 
 # DESCRIPTION
 
+NOTE: **qutechat** enables access to ChatGPT **without ChatGPT API**.
+
 **qutechat** is an Emacs Lisp program designed for interactive control
 of web-based chat systems such as ChatGPT (https://chat.openai.com/)
 from within Emacs.  **qutechat** is implemented using the userscript
