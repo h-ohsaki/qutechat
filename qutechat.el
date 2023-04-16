@@ -58,6 +58,9 @@
   ;; Save the query string to a temporary file.
   (with-temp-buffer
     (insert str)
+    (goto-char (point-min))
+    ;; FIXME: Should preserve all newlines.
+    (replace-string "\n" "")
     (write-region (point-min) (point-max) qutechat-tmpfile))
   ;; Ask the qutebrowser to fill and send the query string.
   (shell-command (format "qutebrowser ':spawn -m -u %s -s %s'"
