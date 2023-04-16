@@ -44,12 +44,6 @@
 ;; FIXME: Avoid hard-coding.
 (defvar qutechat-tmpfile "/tmp/qutechat.tmp")
 
-;; FIXME: Workaround for Emacs's losing focus.
-(defvar qutechat-shell-command-hook
-  '(lambda ()
-     (shell-command "xdotool mousemove 1280 32")
-     (shell-command "xdotool mousemove 32 32")))
-
 ;; (qutechat-send-string "Emacs と vi はどちらがいいですか。")
 ;; (qutechat-send-string "Emacs の面白い歴史は?")
 (defun qutechat-send-string (str)
@@ -60,12 +54,12 @@
     (insert str)
     (goto-char (point-min))
     ;; FIXME: Should preserve all newlines.
-    (replace-string "\n" "")
+    (while (search-forward "\n" nil t)
+      (replace-match ""))
     (write-region (point-min) (point-max) qutechat-tmpfile))
   ;; Ask the qutebrowser to fill and send the query string.
   (shell-command (format "qutebrowser ':spawn -m -u %s -s %s'"
-			 qutechat-proxy-prog qutechat-tmpfile))
-  (run-hooks 'qutechat-shell-command-hook))
+			 qutechat-proxy-prog qutechat-tmpfile)))
   
 (defun qutechat-send-region (start end)
   "Send the region between START and END to a Web-based chat."
@@ -81,7 +75,6 @@ and return it as a string."
   ;; Retrieve the response for the last query.
   (shell-command (format "qutebrowser ':spawn -m -u %s -r %s'"
 			 qutechat-proxy-prog qutechat-tmpfile))
-  (run-hooks 'qutechat-shell-command-hook)
   (sit-for .1)
   (with-temp-buffer
     ;; FIXME: This code assumes the first line is the query.
