@@ -29,7 +29,7 @@ the userscript `chat-proxy`.
 (autoload 'qutechat-send-region "qutechat" nil t)
 (autoload 'qutechat-display-reply "qutechat" nil t)
 (global-set-key "\C-cq" 'qutechat-send-region)
-(global-set-key "\C-cQ" 'qutechat-display-reply)
+(global-set-key "\C-cQ" 'qutechat-insert-reply)
 ```
 
 3. Restart your Emacs or eval `~/.emacs`.
