@@ -6,35 +6,35 @@ qutechat - access ChatGTP from Emacs without OpenAI API
 
 # DESCRIPTION
 
-**qutechat** is an Emacs Lisp program designed for interactively
-accessing ChatGPT (https://chat.openai.com/) as well as other
+**qutechat** is an Emacs Lisp program designed to interactively
+access ChatGPT (https://chat.openai.com/) as well as other
 Web-based chat systems solely from Emacs.  ChatGPT can be easily
 accessed from a program using OpenAI API (e.g., using openai module in
 the Python language), but accessing ChatGPT using OpenAI API has
 several drawbacks.
 
-1. Batch processing via OpenAI API is unstable and slow; accessing
+1. Batch processing via OpenAI API is unstable and slow; Accessing
    OpenAI API sometimes takes a long time or, in some cases, does not
    complete indefinitely.  Such instability makes the experiences of
    accessing ChatGPT frustrating.
 
 2. You must have a non-free OpenAI account with your credit card
-   registration.  Frequently accessing ChatGPT may cost a lot so that
+   registration.  Frequently accessing ChatGPT may cost a lot, so that
    you have to keep watching your OpenAI billing record.
 
-**qutechat** solves above issues by accessing ChatGPT from Emacs
+**qutechat** solves the above issues by accessing ChatGPT from Emacs
 without OpenAI API key.
 
 **qutechat** is implemented using the userscript feature of
 qutebrowser (https://qutebrowser.org/), and therefore it requires
 qutebrowser is running.  **qutechat** operates by remotely controlling
 your instance of qutebrowser using the userscript called `chat-proxy`.
-Therefore, it is necessary for your qutebrowser to be able to execute
-the userscript `chat-proxy`.
+Therefore, your qutebrowser must be able to execute the userscript
+`chat-proxy`.
 
 Note that **qutechat** should work with any Web-based chat system (or
-even any Web-page with an input form), but **qutechat** has been
-tested only with ChatGPT (https://chat.openai.com/).
+even any webpage with an input form), but **qutechat** has been tested
+only with ChatGPT (https://chat.openai.com/).
 
 # INSTALLATION
 
