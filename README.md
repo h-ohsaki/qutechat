@@ -2,6 +2,20 @@
 
 qutechat - access ChatGTP from Emacs without OpenAI API
 
+# WHAT IS QUTECHAT?
+
+The catchphrase of **qutechat** suggested by ChatGPT:
+
+- Interact with ChatGPT and other chat systems right from your Emacs with qutechat.
+
+- Say goodbye to unstable OpenAI API and expensive bills with qutechat for Emacs.
+
+- Access ChatGPT hassle-free from Emacs with qutechat - no OpenAI API key required.
+
+- Boost your productivity by chatting with ChatGPT and other web-based chat systems solely from Emacs with qutechat.
+
+- Unlock the full potential of ChatGPT with qutechat - the Emacs Lisp program that makes it easy and efficient to use.
+
 ![video](https://github.com/h-ohsaki/qutechat/blob/master/screenshot/video.gif)
 
 # DESCRIPTION
