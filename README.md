@@ -55,7 +55,9 @@ only with ChatGPT (https://chat.openai.com/).
 1. Copy `qutechat.el` to an Emacs-lisp directory such as
    `/usr/local/share/emacs/site-lisp`.
 
-2. Add the following lines to your `~/.emacs`.
+2. Add the following lines to your `~/.emacs`.  Do not forget to edit
+   `/path/to/chat-proxy` with the valid absolute path of `chat-proxy`
+   script.
 
 ``` elisp
 ;; qutechat
@@ -63,6 +65,7 @@ only with ChatGPT (https://chat.openai.com/).
 (autoload 'qutechat-display-reply "qutechat" nil t)
 (global-set-key "\C-cq" 'qutechat-send-region)
 (global-set-key "\C-cQ" 'qutechat-insert-reply)
+(setq qutechat-proxy-prog "/path/to/chat-proxy")
 ```
 
 3. Restart your Emacs or eval `~/.emacs`.
@@ -77,17 +80,17 @@ only with ChatGPT (https://chat.openai.com/).
 3. Focus the input form field (i.e., `Send a messge...' field at the
    bottom of ChatGPT).
 
-4. On Emacs, select the region in the current buffer as query
-   sentences or move to the point (i.e., the cursor in Emacs) at
-   around the query sentences.  Type `C-c q` or execute `M-x
-   qutechat-send-region`.
+4. On Emacs, move the point (i.e., the cursor in Emacs) in or at the
+   end of the paragraph of query sentence(s).  Alternatively, you can
+   select the region containing query sentences.  Then, type `C-c q`
+   or execute `M-x qutechat-send`.
 
 5. The query is automatically submitted to ChatGPT in your qutebrower.
    The response from ChatGPT should soon be displayed on the
    qutebrower
 
 6. Once the response is displayed, type `C-c Q` or execute M-x
-   qutechat-display-reply from Emacs.  The response from ChatGPT is
+   qutechat-insert-reply from Emacs.  The response from ChatGPT is
    inserted at the current point in Emacs.
 
 # PATCH TO QUTEBROWSER
