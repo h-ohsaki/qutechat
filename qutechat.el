@@ -1,6 +1,6 @@
 ;; -*- Emacs-Lisp -*-
 ;;
-;; Emacs interface to Web-based chat (e.g., ChatGPT).
+;; Access ChatGTP from Emacs without OpenAI API.
 ;; Copyright (C) 2023 Hiroyuki Ohsaki.
 ;; All rights reserved.
 ;;
@@ -18,31 +18,67 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-;; Add the following lines to your ~/.emacs.
+;; # INSTALLATION
+;; 
+;; 1. Copy `qutechat.el` to an Emacs-lisp directory such as
+;;    `/usr/local/share/emacs/site-lisp`.
+;; 
+;; 2. Add the following lines to your `~/.emacs`.
+;; 
+;; ``` elisp
 ;; ;; qutechat
 ;; (autoload 'qutechat-send-region "qutechat" nil t)
 ;; (autoload 'qutechat-display-reply "qutechat" nil t)
 ;; (global-set-key "\C-cq" 'qutechat-send-region)
 ;; (global-set-key "\C-cQ" 'qutechat-insert-reply)
+;; ```
+;; 
+;; 3. Restart your Emacs or eval `~/.emacs`.
 
-;; Usage:
+;; # USAGE
+;; 
 ;; 1. Start a qutebrowser.
-;; 2. Visit a Web-based chat such as ChatGPT (https://chat.openai.com/)
-;;    in qutebrowser.
-;; 3. Focus the input form field (e.g., `Send a messge...' field in
-;;    ChatGPT).
-;; 4. On Emacs, select the region in the current buffer as a query
-;;    string, and execute `M-x qutechat-send-region`.
-;; 5. The query string is submitted in qutebrower.  The response from the
-;;    Web-based chat system should soon be displayed.
-;; 6. After the response is fully displayed in qutebrower, execute M-x
-;;    qutechat-display-reply from Emacs.
+;; 
+;; 2. Visit ChatGPT (https://chat.openai.com/) in qutebrowser, and login
+;;    with your OpenAI account.
+;; 
+;; 3. Focus the input form field (i.e., `Send a messge...' field at the
+;;    bottom of ChatGPT).
+;; 
+;; 4. On Emacs, select the region in the current buffer as query
+;;    sentences or move to the point (i.e., the cursor in Emacs) at
+;;    around the query sentences.  Type `C-c q` or execute `M-x
+;;    qutechat-send-region`.
+;; 
+;; 5. The query is automatically submitted to ChatGPT in your qutebrower.
+;;    The response from ChatGPT should soon be displayed on the
+;;    qutebrower
+;; 
+;; 6. Once the response is displayed, type `C-c Q` or execute M-x
+;;    qutechat-display-reply from Emacs.  The response from ChatGPT is
+;;    inserted at the current point in Emacs.
 
 (defvar qutechat-proxy-prog "~/src/qutechat/chat-proxy"
   "The name of the qutebrowser userscript.")
 
 ;; FIXME: Avoid hard-coding.
 (defvar qutechat-tmpfile "/tmp/qutechat.tmp")
+
+;; (qutechat--continuous-block)
+(defun qutechat--continuous-block ()
+  (buffer-substring-no-properties
+   (save-excursion
+     (beginning-of-line)
+     (while (and (not (bobp))
+		 (not (looking-at "\s*$")))
+       (forward-line -1))
+     (point))
+   (save-excursion
+     (beginning-of-line)
+     (while (and (not (eobp))
+		 (not (looking-at "\s*$")))
+       (forward-line 1))
+     (point))))
 
 ;; (qutechat-send-string "which of Emacs or vi is better?")
 ;; (qutechat-send-string "what is Emacs's interesting history?")
@@ -55,7 +91,7 @@
     (goto-char (point-min))
     ;; FIXME: Should preserve all newlines.
     (while (search-forward "\n" nil t)
-      (replace-match ""))
+      (replace-match " "))
     (write-region (point-min) (point-max) qutechat-tmpfile))
   ;; Ask the qutebrowser to fill and send the query string.
   (shell-command (format "qutebrowser ':spawn -m -u %s -s %s'"
@@ -64,7 +100,9 @@
 (defun qutechat-send-region (start end)
   "Send the region between START and END to a Web-based chat."
   (interactive "r")
-  (let ((str (buffer-substring start end)))
+  (let ((str (buffer-substring-no-properties start end)))
+    (unless mark-active
+      (setq str (qutechat--continuous-block)))
     (qutechat-send-string str)))
 
 ;; (qutechat-parse-reply)
