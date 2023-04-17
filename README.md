@@ -1,21 +1,40 @@
 # NAME
 
-qutechat - Emacs interface to Web-based chat (e.g., ChatGPT)
+qutechat - access ChatGTP from Emacs without OpenAI API
 
 ![video](https://github.com/h-ohsaki/qutechat/blob/master/screenshot/video.gif)
 
 # DESCRIPTION
 
-NOTE: **qutechat** enables access to ChatGPT **without ChatGPT API**.
+**qutechat** is an Emacs Lisp program designed for interactively
+accessing ChatGPT (https://chat.openai.com/) as well as other
+Web-based chat systems solely from Emacs.  ChatGPT can be easily
+accessed from a program using OpenAI API (e.g., using openai module in
+the Python language), but accessing ChatGPT using OpenAI API has
+several drawbacks.
 
-**qutechat** is an Emacs Lisp program designed for interactive control
-of web-based chat systems such as ChatGPT (https://chat.openai.com/)
-from within Emacs.  **qutechat** is implemented using the userscript
-feature of qutebrowser (https://qutebrowser.org/), and therefore
-requires qutebrowser to function.  **qutechat** operates by remotely
-controlling qutebrowser and running a userscript named `chat-proxy` on
-it.  Therefore, it is necessary for the qutebrowser to be able to run
+1. Batch processing via OpenAI API is unstable and slow; accessing
+   OpenAI API sometimes takes a long time or, in some cases, does not
+   complete indefinitely.  Such instability makes the experiences of
+   accessing ChatGPT frustrating.
+
+2. You must have a non-free OpenAI account with your credit card
+   registration.  Frequently accessing ChatGPT may cost a lot so that
+   you have to keep watching your OpenAI billing record.
+
+**qutechat** solves above issues by accessing ChatGPT from Emacs
+without OpenAI API key.
+
+**qutechat** is implemented using the userscript feature of
+qutebrowser (https://qutebrowser.org/), and therefore it requires
+qutebrowser is running.  **qutechat** operates by remotely controlling
+your instance of qutebrowser using the userscript called `chat-proxy`.
+Therefore, it is necessary for your qutebrowser to be able to execute
 the userscript `chat-proxy`.
+
+Note that **qutechat** should work with any Web-based chat system (or
+even any Web-page with an input form), but **qutechat** has been
+tested only with ChatGPT (https://chat.openai.com/).
 
 # INSTALLATION
 
@@ -38,28 +57,35 @@ the userscript `chat-proxy`.
 
 1. Start a qutebrowser.
 
-2. Visit a Web-based chat such as ChatGPT (https://chat.openai.com/)
-   in qutebrowser.
+2. Visit ChatGPT (https://chat.openai.com/) in qutebrowser, and login
+   with your OpenAI account.
 
-3. Focus the input form field (e.g., `Send a messge...' field in
-   ChatGPT).
+3. Focus the input form field (i.e., `Send a messge...' field at the
+   bottom of ChatGPT).
 
-4. On Emacs, select the region in the current buffer as a query
-   string, and execute `M-x qutechat-send-region`.
+4. On Emacs, select the region in the current buffer as query
+   sentences or move to the point (i.e., the cursor in Emacs) at
+   around the query sentences.  Type `C-c q` or execute `M-x
+   qutechat-send-region`.
 
-5. The query string is submitted in qutebrower.  The response from the
-   Web-based chat system should soon be displayed.
+5. The query is automatically submitted to ChatGPT in your qutebrower.
+   The response from ChatGPT should soon be displayed on the
+   qutebrower
 
-6. After the response is fully displayed in qutebrower, execute M-x
-   qutechat-display-reply from Emacs.
+6. Once the response is displayed, type `C-c Q` or execute M-x
+   qutechat-display-reply from Emacs.  The response from ChatGPT is
+   inserted at the current point in Emacs.
 
 # PATCH TO QUTEBROWSER
 
-On X Window System, qutebrowser raises the window when a command is
-executed.  Due to this behavior, running **qutechat** may cause the
-window focus to move from Emacs to qutebrowser.  To prevent this
-annoying inconvenience, you can apply the following patch to
-qutebrowser.
+On X Window System, qutebrowser automatillcay raises its window when a
+command is executed remotely.  Due to this behavior, running
+**qutechat** may lost the window focus from Emacs; the window focus
+may or may not change from Emacs to qutebrowser.  To prevent this
+annoying behavior, you can apply the following patch to qutebrowser.
+You can find `mainwindow/mainwindow.py` in the qutebrowser
+installation (e.g.,
+`/usr/local/lib/python3.9/dist-packages/qutebrowser`).
 
 ``` python
 --- mainwindow/mainwindow.py.orig       2023-04-17 03:42:04.348059533 +0900
