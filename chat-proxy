@@ -29,6 +29,7 @@ case "$mode" in
 	# Save all the text content.
 	cp $QUTE_TEXT $tmpfile
 	# Fill the form with the query text stored in $FILE.
+	echo 'mode-enter insert' >>$QUTE_FIFO
 	echo "insert-text `cat $file`" >>$QUTE_FIFO
 	sleep .1
 	# Press the entry key in qutebrowser.
