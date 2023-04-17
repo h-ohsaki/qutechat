@@ -59,7 +59,7 @@ only with ChatGPT (https://chat.openai.com/).
 
 ``` elisp
 ;; qutechat
-(autoload 'qutechat-send-region "qutechat" nil t)
+(autoload 'qutechat-send "qutechat" nil t)
 (autoload 'qutechat-display-reply "qutechat" nil t)
 (global-set-key "\C-cq" 'qutechat-send-region)
 (global-set-key "\C-cQ" 'qutechat-insert-reply)
