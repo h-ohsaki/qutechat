@@ -47,20 +47,14 @@
   (let ((str (buffer-substring-no-properties start end)))
     (qutechat-send-string str)))
 
-;; (qutechat--get-block-string)
-(defun qutechat--get-block-string ()
+;; (qutechat--current-paragraph)
+(defun qutechat--current-paragraph ()
   (buffer-substring-no-properties
    (save-excursion
-     (beginning-of-line)
-     (while (and (not (bobp))
-		 (not (looking-at "\s*$")))
-       (forward-line -1))
+     (forward-paragraph -1)
      (point))
    (save-excursion
-     (beginning-of-line)
-     (while (and (not (eobp))
-		 (not (looking-at "\s*$")))
-       (forward-line 1))
+     (forward-paragraph 1)
      (point))))
 
 (defun qutechat-send ()
@@ -72,7 +66,7 @@ sentence(s)."
     (if mark-active
 	(qutechat-send-region (region-beginning) (region-end))
       ;; When mark is inactive.
-      (setq str (qutechat--get-block-string))
+      (setq str (qutechat--current-paragraph))
       (qutechat-send-string str))))
 
 ;; (qutechat-parse-reply)
