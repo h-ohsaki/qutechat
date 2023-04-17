@@ -18,67 +18,11 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-;; # INSTALLATION
-;; 
-;; 1. Copy `qutechat.el` to an Emacs-lisp directory such as
-;;    `/usr/local/share/emacs/site-lisp`.
-;; 
-;; 2. Add the following lines to your `~/.emacs`.
-;; 
-;; ``` elisp
-;; ;; qutechat
-;; (autoload 'qutechat-send-region "qutechat" nil t)
-;; (autoload 'qutechat-display-reply "qutechat" nil t)
-;; (global-set-key "\C-cq" 'qutechat-send-region)
-;; (global-set-key "\C-cQ" 'qutechat-insert-reply)
-;; ```
-;; 
-;; 3. Restart your Emacs or eval `~/.emacs`.
-
-;; # USAGE
-;; 
-;; 1. Start a qutebrowser.
-;; 
-;; 2. Visit ChatGPT (https://chat.openai.com/) in qutebrowser, and login
-;;    with your OpenAI account.
-;; 
-;; 3. Focus the input form field (i.e., `Send a messge...' field at the
-;;    bottom of ChatGPT).
-;; 
-;; 4. On Emacs, select the region in the current buffer as query
-;;    sentences or move to the point (i.e., the cursor in Emacs) at
-;;    around the query sentences.  Type `C-c q` or execute `M-x
-;;    qutechat-send-region`.
-;; 
-;; 5. The query is automatically submitted to ChatGPT in your qutebrower.
-;;    The response from ChatGPT should soon be displayed on the
-;;    qutebrower
-;; 
-;; 6. Once the response is displayed, type `C-c Q` or execute M-x
-;;    qutechat-display-reply from Emacs.  The response from ChatGPT is
-;;    inserted at the current point in Emacs.
-
 (defvar qutechat-proxy-prog "~/src/qutechat/chat-proxy"
   "The name of the qutebrowser userscript.")
 
 ;; FIXME: Avoid hard-coding.
 (defvar qutechat-tmpfile "/tmp/qutechat.tmp")
-
-;; (qutechat--continuous-block)
-(defun qutechat--continuous-block ()
-  (buffer-substring-no-properties
-   (save-excursion
-     (beginning-of-line)
-     (while (and (not (bobp))
-		 (not (looking-at "\s*$")))
-       (forward-line -1))
-     (point))
-   (save-excursion
-     (beginning-of-line)
-     (while (and (not (eobp))
-		 (not (looking-at "\s*$")))
-       (forward-line 1))
-     (point))))
 
 ;; (qutechat-send-string "which of Emacs or vi is better?")
 ;; (qutechat-send-string "what is Emacs's interesting history?")
@@ -101,9 +45,35 @@
   "Send the region between START and END to a Web-based chat."
   (interactive "r")
   (let ((str (buffer-substring-no-properties start end)))
-    (unless mark-active
-      (setq str (qutechat--continuous-block)))
     (qutechat-send-string str)))
+
+;; (qutechat--get-block-string)
+(defun qutechat--get-block-string ()
+  (buffer-substring-no-properties
+   (save-excursion
+     (beginning-of-line)
+     (while (and (not (bobp))
+		 (not (looking-at "\s*$")))
+       (forward-line -1))
+     (point))
+   (save-excursion
+     (beginning-of-line)
+     (while (and (not (eobp))
+		 (not (looking-at "\s*$")))
+       (forward-line 1))
+     (point))))
+
+(defun qutechat-send ()
+  "Send the query sentence(s) around the point to a Web-based
+chat.  If the mark is active, send the marked region as the query
+sentence(s)."
+  (interactive)
+  (let ((str))
+    (if mark-active
+	(qutechat-send-region (region-beginning) (region-end))
+      ;; When mark is inactive.
+      (setq str (qutechat--get-block-string))
+      (qutechat-send-string str))))
 
 ;; (qutechat-parse-reply)
 (defun qutechat-parse-reply ()
