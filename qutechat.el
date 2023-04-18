@@ -26,11 +26,13 @@
 
 ;; (qutechat-send-string "which of Emacs or vi is better?")
 ;; (qutechat-send-string "what is Emacs's interesting history?")
-(defun qutechat-send-string (str)
+(defun qutechat-send-string (str &optional prefix)
   "Send a query string STR to a Web-based chat via qutebrowser."
   (interactive)
   ;; Save the query string to a temporary file.
   (with-temp-buffer
+    (when prefix
+      (insert prefix "\n"))
     (insert str)
     (goto-char (point-min))
     ;; FIXME: Should preserve all newlines.
@@ -41,11 +43,11 @@
   (shell-command (format "qutebrowser ':spawn -m -u %s -s %s'"
 			 qutechat-proxy-prog qutechat-tmpfile)))
   
-(defun qutechat-send-region (start end)
+(defun qutechat-send-region (start end &optional prefix)
   "Send the region between START and END to a Web-based chat."
   (interactive "r")
   (let ((str (buffer-substring-no-properties start end)))
-    (qutechat-send-string str)))
+    (qutechat-send-string str prefix)))
 
 ;; (qutechat--current-paragraph)
 (defun qutechat--current-paragraph ()
@@ -57,17 +59,31 @@
      (forward-paragraph 1)
      (point))))
 
-(defun qutechat-send ()
+(defun qutechat-send (arg)
   "Send the query sentence(s) around the point to a Web-based
 chat.  If the mark is active, send the marked region as the query
 sentence(s)."
-  (interactive)
-  (let ((str))
+  (interactive "P")
+  (let (prefix str ch)
+    (when arg
+      (setq ch (read-char "Select query type ([w]what/[s]ummary/[j]apanese/[e]nglish/[p/P]roofread): "))
+      (cond ((eq ch ?w)
+	     (setq prefix "Explain the following in Japanese with definition, usage, and examples."))
+	    ((eq ch ?s)
+	     (setq prefix "Summarize the following in a plain Japanese."))
+	    ((eq ch ?j)
+	     (setq prefix "Translate the following in Japanese in an academic writing style."))
+	    ((eq ch ?e)
+	     (setq prefix "Translate the following in English in an academic writing style."))
+	    ((eq ch ?p)
+	     (setq prefix "Proofread following text and summarize all suggested changes."))
+	    ((eq ch ?P)
+	     (setq prefix "以下の文章の誤りを直して、変更点の一覧を出力して。"))))
     (if mark-active
-	(qutechat-send-region (region-beginning) (region-end))
+	(qutechat-send-region (region-beginning) (region-end) prefix)
       ;; When mark is inactive.
       (setq str (qutechat--current-paragraph))
-      (qutechat-send-string str))))
+      (qutechat-send-string str prefix))))
 
 ;; (qutechat-parse-reply)
 (defun qutechat-parse-reply ()
