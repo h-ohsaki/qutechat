@@ -24,6 +24,12 @@
 ;; FIXME: Avoid hard-coding.
 (defvar qutechat-tmpfile "/tmp/qutechat.tmp")
 
+(defvar qutechat--last-reply nil
+  "The last reply returned by the server.")
+
+(defvar qutechat--timer nil
+  "A timer event to retriee the response from the server.")
+
 ;; (qutechat-send-string "which of Emacs or vi is better?")
 ;; (qutechat-send-string "what is Emacs's interesting history?")
 (defun qutechat-send-string (str &optional prefix)
@@ -38,10 +44,11 @@
     ;; FIXME: Should preserve all newlines.
     (while (search-forward "\n" nil t)
       (replace-match " "))
-    (write-region (point-min) (point-max) qutechat-tmpfile))
+    (let ((inhibit-message t))
+      (write-region (point-min) (point-max) qutechat-tmpfile)))
   ;; Ask the qutebrowser to fill and send the query string.
-  (shell-command (format "qutebrowser ':spawn -m -u %s -s %s'"
-			 qutechat-proxy-prog qutechat-tmpfile)))
+  (call-process "qutebrowser" nil nil nil 
+		(format ":spawn -m -u %s -s %s" qutechat-proxy-prog qutechat-tmpfile)))
   
 (defun qutechat-send-region (start end &optional prefix)
   "Send the region between START and END to a Web-based chat."
@@ -83,7 +90,10 @@ sentence(s)."
 	(qutechat-send-region (region-beginning) (region-end) prefix)
       ;; When mark is inactive.
       (setq str (qutechat--current-paragraph))
-      (qutechat-send-string str prefix))))
+      (qutechat-send-string str prefix))
+    ;; Display reply buffer and start reply monitor.
+    (pop-to-buffer (get-buffer-create "*Qutechat reply*"))
+    (qutechat--sched-timer-event)))
 
 ;; (qutechat-parse-reply)
 (defun qutechat-parse-reply ()
@@ -91,13 +101,16 @@ sentence(s)."
 and return it as a string."
   (interactive)
   ;; Retrieve the response for the last query.
-  (shell-command (format "qutebrowser ':spawn -m -u %s -r %s'"
-			 qutechat-proxy-prog qutechat-tmpfile))
+  (call-process "qutebrowser" nil nil nil
+		(format ":spawn -m -u %s -r %s"
+			qutechat-proxy-prog qutechat-tmpfile))
   (sit-for .1)
   (with-temp-buffer
     ;; FIXME: This code assumes the first line is the query.
-    (insert "Q. ")
     (insert-file-contents qutechat-tmpfile)
+    (goto-char (point-min))
+    (while (search-forward "·" nil t) ;; \xb7
+      (replace-match "."))
     (buffer-string)))
 
 ;; (qutechat-insert-reply)
@@ -107,3 +120,29 @@ chat at the point."
   (interactive)
   (let ((reply (qutechat-parse-reply)))
     (insert reply)))
+
+;; (qutechat--timer-event)
+(defun qutechat--timer-event ()
+  (let ((buf (get-buffer-create "*Qutechat reply*"))
+	(reply (qutechat-parse-reply)))
+    (with-current-buffer buf
+      (when (not (string= qutechat--last-reply reply))
+	(visual-line-mode 1)
+	(erase-buffer)
+	(insert reply)
+	(setq qutechat--last-reply reply)
+	;; Cancel the monitor when the reply is fully displayed.
+	(when (save-excursion
+		(goto-char (point-min))
+		(re-search-forward "^Regenerate response" nil t))
+	  (cancel-timer qutechat--timer)
+	  (setq qutechat--timer nil))))))
+
+;; (qutechat--sched-timer-event)
+(defun qutechat--sched-timer-event ()
+  (if (and qutechat--timer
+	   (memq qutechat--timer timer-list))
+      ;; Do not create a timer if already present.
+      nil
+    (setq qutechat--timer (run-with-timer
+			   1 .5 'qutechat--timer-event))))
