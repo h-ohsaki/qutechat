@@ -30,6 +30,8 @@
 (defvar qutechat--timer nil
   "A timer event to retriee the response from the server.")
 
+(defvar qutechat--timer-count nil)
+
 ;; (qutechat-send-string "which of Emacs or vi is better?")
 ;; (qutechat-send-string "what is Emacs's interesting history?")
 (defun qutechat-send-string (str &optional prefix)
@@ -71,7 +73,7 @@
 chat.  If the mark is active, send the marked region as the query
 sentence(s)."
   (interactive "P")
-  (let (prefix str ch)
+  (let (prefix str ch buf)
     (when arg
       (setq ch (read-char "Select query type ([w]what/[s]ummary/[j]apanese/[e]nglish/[p/P]roofread): "))
       (cond ((eq ch ?w)
@@ -92,7 +94,10 @@ sentence(s)."
       (setq str (qutechat--current-paragraph))
       (qutechat-send-string str prefix))
     ;; Display reply buffer and start reply monitor.
-    (pop-to-buffer (get-buffer-create "*Qutechat reply*"))
+    (setq buf (get-buffer-create "*Qutechat reply*"))
+    (delete-other-windows)
+    (split-window)
+    (set-window-buffer (next-window) buf)
     (qutechat--sched-timer-event)))
 
 ;; (qutechat-parse-reply)
@@ -126,17 +131,17 @@ chat at the point."
   (let ((buf (get-buffer-create "*Qutechat reply*"))
 	(reply (qutechat-parse-reply)))
     (with-current-buffer buf
-      (when (not (string= qutechat--last-reply reply))
-	(visual-line-mode 1)
-	(erase-buffer)
-	(insert reply)
-	(setq qutechat--last-reply reply)
-	;; Cancel the monitor when the reply is fully displayed.
-	(when (save-excursion
-		(goto-char (point-min))
-		(re-search-forward "^Regenerate response" nil t))
-	  (cancel-timer qutechat--timer)
-	  (setq qutechat--timer nil))))))
+      (cond ((string= qutechat--last-reply reply) ;; No update.
+	     (setq qutechat--timer-count (1+ qutechat--timer-count))
+	     ;; Stop the reply monitor after no update for 10 seconds.
+	     (when (> qutechat--timer-count 10)
+	       (qutechat--cancel-timer-event)))
+	    (t ;; Updated.
+	     (visual-line-mode 1)
+	     (erase-buffer)
+	     (insert reply)
+	     (setq qutechat--last-reply reply)
+	     (setq qutechat--timer-count 0))))))	  
 
 ;; (qutechat--sched-timer-event)
 (defun qutechat--sched-timer-event ()
@@ -145,4 +150,10 @@ chat at the point."
       ;; Do not create a timer if already present.
       nil
     (setq qutechat--timer (run-with-timer
-			   1 .5 'qutechat--timer-event))))
+			   1 1 'qutechat--timer-event))
+    (setq qutechat--timer-count 0)))
+
+(defun qutechat--cancel-timer-event ()
+  (when qutechat--timer
+    (cancel-timer qutechat--timer)
+    (setq qutechat--timer nil)))
