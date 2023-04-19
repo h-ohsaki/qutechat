@@ -55,7 +55,18 @@ only with ChatGPT (https://chat.openai.com/).
 1. Copy `qutechat.el` to an Emacs-lisp directory such as
    `/usr/local/share/emacs/site-lisp`.
 
-2. Add the following lines to your `~/.emacs`.  Do not forget to edit
+``` sh
+> sudo install qutechat.el /usr/local/share/emacs/site-lisp
+```
+
+2. Copy `chat-proxy` to a anywhere acccesible from qutebrowser as an
+   executable script.  Replace `/path/to` with a valid directory.
+
+``` sh
+> sudo install -m 755 chat-proxy /path/to/
+```
+
+3. Add the following lines to your `~/.emacs`.  Do not forget to edit
    `/path/to/chat-proxy` with the valid absolute path of `chat-proxy`
    script.
 
@@ -87,7 +98,7 @@ only with ChatGPT (https://chat.openai.com/).
 
 5. The query is automatically submitted to ChatGPT in your qutebrower.
    The response from ChatGPT should soon be displayed on the
-   qutebrower
+   qutebrower.
 
 6. Once the response is displayed, type `C-c Q` or execute M-x
    qutechat-insert-reply from Emacs.  The response from ChatGPT is
