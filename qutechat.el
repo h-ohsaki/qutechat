@@ -18,14 +18,25 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-(defvar qutechat-proxy-prog "~/src/qutechat/chat-proxy"
+(defvar qutechat-prog "~/src/qutechat/chat-proxy"
   "The name of the qutebrowser userscript.")
+
+(defvar qutechat-buffer-name "*Qutechat reply*"
+  "The name of the buffer to display the response from Web chat.")
 
 ;; FIXME: Avoid hard-coding.
 (defvar qutechat-tmpfile "/tmp/qutechat.tmp")
 
 (defvar qutechat--last-reply nil
   "The last reply returned by the server.")
+
+(defvar chatgpt-prefix-alist
+  '((?w . "Explain the following in Japanese with definition, pros, cons, examples, and issues.")
+    (?s . "Summarize the following in a plain Japanese.")
+    (?j . "Translate the following in Japanese in an academic writing style.")
+    (?e . "Translate the following in English in an academic writing style.")
+    (?p . "Proofread following text and summarize all suggested changes.")
+    (?P . "以下の文章の誤りを直して、変更点の一覧を出力して。")))
 
 (defvar qutechat--timer nil
   "A timer event to retriee the response from the server.")
@@ -50,7 +61,7 @@
       (write-region (point-min) (point-max) qutechat-tmpfile)))
   ;; Ask the qutebrowser to fill and send the query string.
   (call-process "qutebrowser" nil nil nil 
-		(format ":spawn -m -u %s -s %s" qutechat-proxy-prog qutechat-tmpfile)))
+		(format ":spawn -m -u %s -s %s" qutechat-prog qutechat-tmpfile)))
   
 (defun qutechat-send-region (start end &optional prefix)
   "Send the region between START and END to a Web-based chat."
@@ -73,42 +84,32 @@
 chat.  If the mark is active, send the marked region as the query
 sentence(s)."
   (interactive "P")
-  (let (prefix str ch buf)
+  (let (prefix str buf)
     (when arg
-      (setq ch (read-char "Select query type ([w]what/[s]ummary/[j]apanese/[e]nglish/[p/P]roofread): "))
-      (cond ((eq ch ?w)
-	     (setq prefix "Explain the following in Japanese with definition, usage, and examples."))
-	    ((eq ch ?s)
-	     (setq prefix "Summarize the following in a plain Japanese."))
-	    ((eq ch ?j)
-	     (setq prefix "Translate the following in Japanese in an academic writing style."))
-	    ((eq ch ?e)
-	     (setq prefix "Translate the following in English in an academic writing style."))
-	    ((eq ch ?p)
-	     (setq prefix "Proofread following text and summarize all suggested changes."))
-	    ((eq ch ?P)
-	     (setq prefix "以下の文章の誤りを直して、変更点の一覧を出力して。"))))
+      (let* ((ch (read-char "Prefix [w]what/[s]ummary/[j]apanese/[e]nglish/[p/P]roofread: "))
+	     (val (assoc ch chatgpt-prefix-alist)))
+	(setq prefix (cdr val))))
     (if mark-active
 	(qutechat-send-region (region-beginning) (region-end) prefix)
       ;; When mark is inactive.
       (setq str (qutechat--current-paragraph))
       (qutechat-send-string str prefix))
     ;; Display reply buffer and start reply monitor.
-    (setq buf (get-buffer-create "*Qutechat reply*"))
+    (setq buf (get-buffer-create qutechat-buffer-name))
     (delete-other-windows)
     (split-window)
     (set-window-buffer (next-window) buf)
     (qutechat--sched-timer-event)))
 
-;; (qutechat-parse-reply)
-(defun qutechat-parse-reply ()
+;; (qutechat--parse-reply)
+(defun qutechat--parse-reply ()
   "Check the response for the last query from a Web-based chat
 and return it as a string."
   (interactive)
-  ;; Retrieve the response for the last query.
+  ;; Retrieve the reply for the last query.
   (call-process "qutebrowser" nil nil nil
 		(format ":spawn -m -u %s -r %s"
-			qutechat-proxy-prog qutechat-tmpfile))
+			qutechat-prog qutechat-tmpfile))
   (sit-for .1)
   (with-temp-buffer
     ;; FIXME: This code assumes the first line is the query.
@@ -120,24 +121,23 @@ and return it as a string."
 
 ;; (qutechat-insert-reply)
 (defun qutechat-insert-reply ()
-  "Insert the response for the last query from a Web-based
-chat at the point."
+  "At the current point, insert the response for the last query
+from a Web-based chat."
   (interactive)
-  (let ((reply (qutechat-parse-reply)))
+  (let ((reply (qutechat--parse-reply)))
     (insert reply)))
 
 ;; (qutechat--timer-event)
 (defun qutechat--timer-event ()
-  (let ((buf (get-buffer-create "*Qutechat reply*"))
-	(reply (qutechat-parse-reply)))
+  (let ((buf (get-buffer-create qutechat-buffer-name))
+	(reply (qutechat--parse-reply)))
     (with-current-buffer buf
       (cond ((string= qutechat--last-reply reply) ;; No update.
 	     (setq qutechat--timer-count (1+ qutechat--timer-count))
-	     ;; Stop the reply monitor after no update for 10 seconds.
+	     ;; Stop the reply monitor after no update for 5 seconds.
 	     (when (> qutechat--timer-count 10)
 	       (qutechat--cancel-timer-event)))
 	    (t ;; Updated.
-	     (visual-line-mode 1)
 	     (erase-buffer)
 	     (insert reply)
 	     (setq qutechat--last-reply reply)
@@ -150,7 +150,7 @@ chat at the point."
       ;; Do not create a timer if already present.
       nil
     (setq qutechat--timer (run-with-timer
-			   1 1 'qutechat--timer-event))
+			   1 .5 'qutechat--timer-event))
     (setq qutechat--timer-count 0)))
 
 (defun qutechat--cancel-timer-event ()
