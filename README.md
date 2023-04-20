@@ -16,7 +16,7 @@ The catchphrase of **qutechat** suggested by ChatGPT:
 
 - Unlock the full potential of ChatGPT with qutechat - the Emacs Lisp program that makes it easy and efficient to use.
 
-![video](https://github.com/h-ohsaki/qutechat/blob/master/screenshot/video.gif)
+![video](screenshot/video.gif)
 
 # DESCRIPTION
 
