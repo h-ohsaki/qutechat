@@ -1,6 +1,6 @@
 # NAME
 
-qutechat - access ChatGTP from Emacs without OpenAI API
+**qutechat** - access ChatGTP from Emacs without OpenAI API
 
 # WHAT IS QUTECHAT?
 
@@ -27,10 +27,9 @@ accessed from a program using OpenAI API (e.g., using openai module in
 the Python language), but accessing ChatGPT using OpenAI API has
 several drawbacks.
 
-1. Batch processing via OpenAI API is unstable and slow; Accessing
-   OpenAI API sometimes takes a long time or, in some cases, does not
-   complete indefinitely.  Such instability makes the experiences of
-   accessing ChatGPT frustrating.
+1. Batch processing via OpenAI API is slow; Accessing OpenAI API
+   sometimes takes a long time.  Such slow response makes the
+   experiences of accessing ChatGPT frustrating.
 
 2. You must have a non-free OpenAI account with your credit card
    registration.  Frequently accessing ChatGPT may cost a lot, so that
@@ -52,34 +51,17 @@ only with ChatGPT (https://chat.openai.com/).
 
 # INSTALLATION
 
-1. Copy `qutechat.el` to an Emacs-lisp directory such as
-   `/usr/local/share/emacs/site-lisp`.
-
 ``` sh
-> sudo install qutechat.el /usr/local/share/emacs/site-lisp
-```
-
-2. Copy `chat-proxy` to a anywhere acccesible from qutebrowser as an
-   executable script.  Replace `/path/to` with a valid directory.
-
-``` sh
-> sudo install -m 755 chat-proxy /path/to/
-```
-
-3. Add the following lines to your `~/.emacs`.  Do not forget to edit
-   `/path/to/chat-proxy` with the valid absolute path of `chat-proxy`
-   script.
-
-``` elisp
+> git clone https://github.com/h-ohsaki/qutechat.git
+> sudo install -m 644 qutechat/qutechat.el /usr/local/share/emacs/site-lisp
+> cat <<EOF >>~/.emacs
 ;; qutechat
 (autoload 'qutechat-send "qutechat" nil t)
 (autoload 'qutechat-display-reply "qutechat" nil t)
 (global-set-key "\C-cq" 'qutechat-send-region)
 (global-set-key "\C-cQ" 'qutechat-insert-reply)
-(setq qutechat-proxy-prog "/path/to/chat-proxy")
+(setq qutechat-proxy-prog "../path/to/qutechat/chat-proxy")
 ```
-
-3. Restart your Emacs or eval `~/.emacs`.
 
 # USAGE
 
@@ -93,16 +75,16 @@ only with ChatGPT (https://chat.openai.com/).
 
 4. On Emacs, move the point (i.e., the cursor in Emacs) in or at the
    end of the paragraph of query sentence(s).  Alternatively, you can
-   select the region containing query sentences.  Then, type `C-c q`
+   select the region containing query sentence(s).  Then, type `C-c q`
    or execute `M-x qutechat-send`.
 
 5. The query is automatically submitted to ChatGPT in your qutebrower.
-   The response from ChatGPT should soon be displayed on the
-   qutebrower.
+   The reply from ChatGPT will soon be displayed in another buffer in
+   Emacs.
 
-6. Once the response is displayed, type `C-c Q` or execute M-x
+6. Once the reply is displayed, type `C-c Q` or execute M-x
    qutechat-insert-reply from Emacs.  The response from ChatGPT is
-   inserted at the current point in Emacs.
+   inserted at the current point.
 
 # PATCH TO QUTEBROWSER
 
