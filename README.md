@@ -61,6 +61,7 @@ only with ChatGPT (https://chat.openai.com/).
 (global-set-key "\C-cq" 'qutechat-send-region)
 (global-set-key "\C-cQ" 'qutechat-insert-reply)
 (setq qutechat-proxy-prog "../path/to/qutechat/chat-proxy")
+EOF
 ```
 
 # USAGE
