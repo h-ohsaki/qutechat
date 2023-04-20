@@ -99,6 +99,7 @@ sentence(s)."
     (delete-other-windows)
     (split-window)
     (set-window-buffer (next-window) buf)
+    (setq qutechat--timer-count 0)
     (qutechat--sched-timer-event)))
 
 ;; (qutechat--parse-reply)
@@ -132,28 +133,19 @@ from a Web-based chat."
   (let ((buf (get-buffer-create qutechat-buffer-name))
 	(reply (qutechat--parse-reply)))
     (with-current-buffer buf
-      (cond ((string= qutechat--last-reply reply) ;; No update.
-	     (setq qutechat--timer-count (1+ qutechat--timer-count))
-	     ;; Stop the reply monitor after no update for 5 seconds.
-	     (when (> qutechat--timer-count 10)
-	       (qutechat--cancel-timer-event)))
-	    (t ;; Updated.
-	     (erase-buffer)
-	     (insert reply)
-	     (setq qutechat--last-reply reply)
-	     (setq qutechat--timer-count 0))))))	  
+      (if (string= qutechat--last-reply reply) 
+	  ;; No update.
+	  (setq qutechat--timer-count (1+ qutechat--timer-count))
+	;; Updated.
+	(erase-buffer)
+	(insert reply)
+	(setq qutechat--last-reply reply)
+	(setq qutechat--timer-count 0))
+      ;; Schedule next event if it seems reply is updating.
+      (if (< qutechat--timer-count 10)
+	  (qutechat--sched-timer-event)
+	(insert "\n----")))))
 
 ;; (qutechat--sched-timer-event)
 (defun qutechat--sched-timer-event ()
-  (if (and qutechat--timer
-	   (memq qutechat--timer timer-list))
-      ;; Do not create a timer if already present.
-      nil
-    (setq qutechat--timer (run-with-timer
-			   1 .5 'qutechat--timer-event))
-    (setq qutechat--timer-count 0)))
-
-(defun qutechat--cancel-timer-event ()
-  (when qutechat--timer
-    (cancel-timer qutechat--timer)
-    (setq qutechat--timer nil)))
+  (run-with-timer .25 nil 'qutechat--timer-event))
