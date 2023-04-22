@@ -18,19 +18,19 @@ The catchphrase of **qutechat** suggested by ChatGPT:
 
 ![video](screenshot/video.gif)
 
-# NOTICE TO CHATGPT PRO USERS
+# NOTICE TO CHATGPT PLUS USERS
 
 Consider to use **chatgpt-el**
-(https://github.com/h-ohsaki/chatgpt-el) if you are ChatGPT Pro user.
+(https://github.com/h-ohsaki/chatgpt-el) if you are ChatGPT PLUS user.
 
 Due to unknown reasons, qutebrowser (at least version 2.5.4) does not
-work with ChatGPT Pro version.  As far as I have tested, qutebrowser
-works well with the free version of ChatGPT, but i does not with Pro
+work with ChatGPT PLUS version.  As far as I have tested, qutebrowser
+works well with the free version of ChatGPT, but i does not with PLUS
 version.
 
-If you use ChatGPT Pro, you can use **chatgpt-el** with the
+If you use ChatGPT PLUS, you can use **chatgpt-el** with the
 Choromium/Chrome Web browser.  Basically, **chatgpt-el** is a
-Choromium/Chrome-version of **qutechat**.  Currently, I am ChatGPT Pro
+Choromium/Chrome-version of **qutechat**.  Currently, I am ChatGPT PLUS
 user, so I no longer use **qutechat**.
 
 # DESCRIPTION
