@@ -24,7 +24,9 @@
   "The name of the qutebrowser userscript.")
 
 ;; FIXME: Avoid hard-coding.
-(defvar qutechat--tmpfile "/tmp/qutechat.tmp")
+;; FIXME: These files must be readable only by the owner.
+(defvar qutechat--query-file "/tmp/.qutechat-query")
+(defvar qutechat--reply-file "/tmp/.qutechat-reply")
 
 ;; ----------------------------------------------------------------
 ;; Low level interfaces.
@@ -38,23 +40,23 @@
       (replace-match " "))
     ;; Provide chromium with the query string.
     (let ((inhibit-message t))
-      (write-region (point-min) (point-max) qutechat--tmpfile))
+      (write-region (point-min) (point-max) qutechat--query-file))
     ;; Ask the qutebrowser to fill and send the query string.
     (call-process "qutebrowser" nil nil nil 
 		  (format ":spawn -m -u %s -s %s"
-			  qutechat-prog qutechat--tmpfile))))
+			  qutechat-prog qutechat--query-file))))
 
 ;; (qutechat--start-recv-process nil)
 (defun qutechat--start-recv-process (tmpbuf)
   (start-process "qutechat" tmpbuf "qutebrowser"
 		 (format ":spawn -m -u %s -r %s"
-			 qutechat-prog qutechat--tmpfile)))
+			 qutechat-prog qutechat--reply-file)))
 
 ;; (qutechat--extract-reply)
 (defun qutechat--extract-reply ()
   (with-temp-buffer
     (insert "Q. " chatgpt--last-query "\n\n")
-    (insert-file-contents qutechat--tmpfile)
+    (insert-file-contents qutechat--reply-file)
     (goto-char (point-min))
     (while (search-forward "·" nil t) ;; 0xb7
       (replace-match "."))
