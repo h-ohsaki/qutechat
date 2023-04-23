@@ -112,7 +112,6 @@ hello
 
 Hello! How can I assist you today?
 
-EOF
 ```
 
 This will show the reply from ChatGPT, which must be equivalent to
