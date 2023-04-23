@@ -28,7 +28,7 @@
 
 ;; ----------------------------------------------------------------
 ;; Low level interfaces.
-(defun chatgpt--send-query (query)
+(defun qutechat--send-query (query)
   ;; Compose a query in a temporary buffer.
   (with-temp-buffer
     (insert query)
@@ -44,15 +44,24 @@
 		  (format ":spawn -m -u %s -s %s"
 			  qutechat-prog qutechat--tmpfile))))
 
-;; (chatgpt--start-recv-process nil)
-(defun chatgpt--start-recv-process (tmpbuf)
-  (start-process "chatgpt" tmpbuf "qutebrowser"
+;; (qutechat--start-recv-process nil)
+(defun qutechat--start-recv-process (tmpbuf)
+  (start-process "qutechat" tmpbuf "qutebrowser"
 		 (format ":spawn -m -u %s -r %s"
 			 qutechat-prog qutechat--tmpfile)))
 
-;; (chatgpt--extract-reply)
-(defun chatgpt--extract-reply ()
+;; (qutechat--extract-reply)
+(defun qutechat--extract-reply ()
   (with-temp-buffer
     (insert "Q. " chatgpt--last-query "\n\n")
     (insert-file-contents qutechat--tmpfile)
+    (goto-char (point-min))
+    (while (search-forward "·" nil t) ;; 0xb7
+      (replace-match "."))
     (buffer-string)))
+
+;; ----------------------------------------------------------------
+;; FIXME: Should  restore original values if necessary.
+(setq chatgpt-send-query-function 'qutechat--send-query)
+(setq chatgpt-start-recv-process-function 'qutechat--start-recv-process)
+(setq chatgpt-extract-reply-function 'qutechat--extract-reply)
