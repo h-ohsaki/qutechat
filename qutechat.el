@@ -38,6 +38,18 @@
     (goto-char (point-min))
     (while (search-forward "\n" nil t)
       (replace-match " "))
+    ;; Escape special characters.
+    ;; Note: insert-text command in qutebrowser behaves different when
+    ;; invoked within qutebrowser and invoked from "qutebrowser"
+    ;; program.  For example, insert-text 'a\nb' works fine if
+    ;; executed on the qutebrowser.  However, a shell command
+    ;; `qutebrowser ":insert-text 'a\nb'"` fails; escape characters
+    ;; such as `\n` are not correctly recognized.  Also, some
+    ;; characters such as `;` have special meaning to insert-text
+    ;; command.
+    (goto-char (point-min))
+    (while (re-search-forward "\\([;\\\\]\\)" nil t)
+      (replace-match "\\\\\\1"))
     ;; Provide chromium with the query string.
     (let ((inhibit-message t))
       (write-region (point-min) (point-max) qutechat--query-file))
